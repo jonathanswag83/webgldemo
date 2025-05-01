@@ -36,7 +36,7 @@ void main()
     float siY = sin(Angle.y);
     mat4 matY = mat4(
         vec4(coY, 0.0, -siY, 0.0),
-        vec4(0.0, 1.0, siX, 0.0),
+        vec4(0.0, 1.0, 0.0, 0.0),
         vec4(siY, 0.0, coY, 0.0),
         vec4(0.0, 0.0, 0.0, 1.0)
         );
@@ -45,7 +45,7 @@ void main()
     gl_Position = matY * matX * vec4(Pos, 1.0);
     vertexColor = Color;
     uv = UV;
-    normal = Normal;
+    normal = (matY * matX * vec4(Normal, 1.0)).xyz;
 }
         </textarea>
         <textarea id="fs" spellcheck="false">
@@ -66,9 +66,10 @@ void main()
     gl_FragColor = vec4(mix(color, texture, p) * shade, 1.0);
 }
         </textarea>
-        <select id="shape" onchange="InitShaders();">
+        <select id="shape" onchange="InitShaders(); Update();">
             <option selected>Triangle</option>
             <option>Quad</option>
+            <option>Cube</option>
         </select>
         <input type="checkbox" id="t" onchange="Update();">show texture<input type="color" id="l" value="#f6b73c" onchange="Update();">Light color<br>>
         <div id="ui"></div>

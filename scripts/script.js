@@ -21,7 +21,7 @@ function InitViewport()
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.clearColor(0.0, 0.4, 0.6, 1);
     gl.enable(gl.DEPTH_TEST);
-    // gl.enable(gl.CULL_FACE);
+    gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
     InitShaders();
@@ -126,7 +126,8 @@ function CreateGeometryUI()
     switch (e.selectedIndex)
     {
         case 0: CreateTriangle(w, h); break;
-        case 1: CreateQuad(w, h,); break;
+        case 1: CreateQuad(w, h); break;
+        case 2: CreateCube(w); break;
     }
 
 }
@@ -213,9 +214,9 @@ function CreateTriangle(width, height)
     const w = width * 0.5;
     const h = height * 0.5;
 
-    AddTriangle(0.0, h, 0.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0, 0.0, 1.0,
+    AddTriangle(0.0, h, 0.0, 1.0, 0.0, 0.0, 0.5, 1.0, 0.0, 0.5, 1.0,
                -w,-h, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-                w,-h, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0
+                w,-h, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0
     );
 
 }
@@ -235,6 +236,43 @@ function CreateQuad(width, height)
 
 }
 
+function CreateCube(size) {
+    vertices.length = 0;
+    const s = size * 0.5;
+
+    // Each face: [v1, v2, v3, v4], normal
+    const faces = [
+        // Front (+Z)
+        [[[-s, -s,  s], [0, 0]], [[ s, -s,  s], [1, 0]], [[ s,  s,  s], [1, 1]], [[-s,  s,  s], [0, 1]], [0, 0, 1]],
+        // Back (-Z)
+        [[[ s, -s, -s], [0, 0]], [[-s, -s, -s], [1, 0]], [[-s,  s, -s], [1, 1]], [[ s,  s, -s], [0, 1]], [0, 0, -1]],
+        // Left (-X)
+        [[[-s, -s, -s], [0, 0]], [[-s, -s,  s], [1, 0]], [[-s,  s,  s], [1, 1]], [[-s,  s, -s], [0, 1]], [-1, 0, 0]],
+        // Right (+X)
+        [[[ s, -s,  s], [0, 0]], [[ s, -s, -s], [1, 0]], [[ s,  s, -s], [1, 1]], [[ s,  s,  s], [0, 1]], [1, 0, 0]],
+        // Top (+Y)
+        [[[-s,  s,  s], [0, 0]], [[ s,  s,  s], [1, 0]], [[ s,  s, -s], [1, 1]], [[-s,  s, -s], [0, 1]], [0, 1, 0]],
+        // Bottom (-Y)
+        [[[-s, -s, -s], [0, 0]], [[ s, -s, -s], [1, 0]], [[ s, -s,  s], [1, 1]], [[-s, -s,  s], [0, 1]], [0, -1, 0]],
+    ];
+
+    for (let f of faces) {
+        const [v1, v2, v3, v4, normal] = f;
+
+        // You can change colors per face if desired
+        const color = [Math.random(), Math.random(), Math.random()];
+
+        AddQuad(
+            v1[0][0], v1[0][1], v1[0][2], color[0], color[1], color[2], v1[1][0], v1[1][1], normal[0], normal[1], normal[2],
+            v2[0][0], v2[0][1], v2[0][2], color[0], color[1], color[2], v2[1][0], v2[1][1], normal[0], normal[1], normal[2],
+            v3[0][0], v3[0][1], v3[0][2], color[0], color[1], color[2], v3[1][0], v3[1][1], normal[0], normal[1], normal[2],
+            v4[0][0], v4[0][1], v4[0][2], color[0], color[1], color[2], v4[1][0], v4[1][1], normal[0], normal[1], normal[2]
+        );
+    }
+}
+
+
+
 var mouseX = 0;
 var mouseY = 0;
 var angle = [ 0.0, 0.0, 0.0, 1.0 ];
@@ -243,8 +281,8 @@ document.getElementById('gl').addEventListener(
     'mousemove', function(e) {
         if (e.buttons == 1)
         {
-            angle[0] -= (mouseY - e.y) * 0.1;
-            angle[1] -= (mouseX - e.x) * 0.1;
+            angle[0] -= (mouseY - e.y) * 0.01;
+            angle[1] -= (mouseX - e.x) * 0.01;
             gl.uniform4fv(angleGL, new Float32Array(angle));
             Render();
         }
